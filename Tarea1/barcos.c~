@@ -1,0 +1,246 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct persona
+{
+	int * edad;
+	char * nombre;
+	char * apellido;
+	char * rol;
+};
+
+struct barco
+{
+	char * nombre;
+	float * eslora;
+	float * manga;
+	struct persona * tripulantes;
+	struct persona * propietario;
+	int * ocupados;
+	int * maximoTripulantes;
+};
+
+void agregarBarco(struct barco ** e, int * cantBarcos);
+void agregarPersona(struct persona ** p, int * cantBarcos);
+void liberarMemoria(struct barco * e, int * cantBarcos);
+
+
+int main(int argc, char **argv)
+{
+	int opcion = -1;
+	int cantBarcos = 0;
+	struct barco * barcos = NULL;
+	
+	while(opcion != 0)
+	{
+		printf("Menu:\n1. Agregar barco\n2. Agregar Persona\n3. Listar barcos\n4. Listar personas de un barco\n0. Salir\n");
+		scanf("%d", &opcion);
+		switch(opcion)
+		{
+			case 1:
+			{
+				agregarBarco(&barcos, &cantBarcos);
+				printf("Nombre de la embarcacion: ");
+				scanf("\n%[^\n]", (barcos+cantBarcos-1)->nombre);
+				printf("Nombre del dueno: ");
+				scanf("\n%[^\n]", (barcos+cantBarcos-1)->propietario->nombre);
+				printf("apellido del dueno: ");
+				scanf("\n%[^\n]", (barcos+cantBarcos-1)->propietario->apellido);
+				printf("Edad del dueno: ");
+				scanf("%d", (barcos+cantBarcos-1)->propietario->edad);
+				printf("Eslora: ");
+				scanf("%f", (barcos+cantBarcos-1)->eslora);
+				printf("Manga: ");
+				scanf("%f", (barcos+cantBarcos-1)->manga);
+				printf("Numero de ocupantes: ");
+				scanf("%d", (barcos+cantBarcos-1)->maximoTripulantes);
+				*((barcos+cantBarcos-1)->ocupados) = 0;
+				break;
+			}
+			case 2:
+			{
+				if(cantBarcos == 0)
+				{
+					printf("No hay barcos en el puerto.\n");
+				}
+				else
+				{
+					int num;
+					printf("Numero de barco al que se le va a crear el tripulante: ");
+					scanf("%d", &num);
+					if(num >= cantBarcos)
+					{
+						printf("No existe ese barco.\n");
+					}
+					else
+					{
+						struct barco * e = (barcos+num);
+						int oc = *(e->ocupados);
+						if(oc >= *(e->maximoTripulantes))
+						{
+							printf("Ya no hay lugares disponibles.\n");
+						}
+						else
+						{
+							agregarPersona(&(e->tripulantes), &oc);
+							printf("Nombre del tripulante: ");
+							scanf("\n%[^\n]", ((e->tripulantes)+oc)->nombre);
+							printf("apellido del tripulante: ");
+							scanf("\n%[^\n]", ((e->tripulantes)+oc)->apellido);
+							printf("Edad del tripulante: ");
+							scanf("%d", ((e->tripulantes)+oc)->edad);
+							printf("Rol del tripulante: ");
+							scanf("\n%[^\n]", ((e->tripulantes)+oc)->rol);
+							++(*(e->ocupados));
+						}				
+					}
+				}
+				
+				break;
+			}
+			case 3:
+			{
+				printf("Hay %d barcos.\n\n", cantBarcos);
+				int i;
+				for(i = 0; i < cantBarcos; ++i)
+				{
+					printf("barco %d:\n", i);
+					printf("Nombre: %s\n", (barcos+i)->nombre);
+					printf("Nombre del dueno: %s\n", (barcos+i)->propietario->nombre);
+					printf("apellido del dueno: %s\n", (barcos+i)->propietario->apellido);
+					printf("Edad del dueno: %d\n\n", *(barcos+i)->propietario->edad);
+					printf("Numero de Ocupantes: %d\n", *(barcos+i)->maximoTripulantes);
+					printf("Cantidad de tripulantes: %d\n", *(barcos+i)->ocupados);
+					printf("Lugares disponibles: %d\n", *(barcos+i)->maximoTripulantes-(*(barcos+i)->ocupados));
+					printf("Manga: %f\n", *(barcos+i)->manga);
+					printf("Eslora: %f\n", *(barcos+i)->eslora);
+					
+				}
+				break;
+			}
+			case 4:
+			{
+				if(cantBarcos == 0)
+				{
+					printf("No hay barcos.\n");
+				}
+				else
+				{
+					int num;
+					printf("Ingrese el numero de barco para cual desea conocer los tripulantes: ");
+					scanf("%d", &num);
+					if(num >= cantBarcos)
+					{
+						printf("No existe la barco numero %d.\n", num);
+					}
+					else
+					{
+						struct persona * man = (barcos+num)->tripulantes;
+						int cant = *((barcos+num)->ocupados);
+						
+						printf("Hay %d tripulantes en el barco %d:\n", cant, num);
+						
+						int i;
+						for(i = 0; i < cant; ++i)
+						{
+							printf("Tripulante %d:\n", i);
+							printf("Nombre: %s\n", (man+i)->nombre);
+							printf("apellido: %s\n", (man+i)->apellido);
+							printf("Rol: %s\n\n", (man+i)->rol);
+							printf("Edad: %d\n", *(man+i)->edad);
+						}
+						
+					}
+				}
+				break;
+			}
+			case 0:
+			{
+				printf("Adios gracias por utilizar el sistema de barcos");
+			}
+		}
+	}
+	
+	
+	return 0;
+}
+
+
+void liberarMemoria(struct barco * barcos, int * cantBarcos)
+{
+	int i;
+	for(i = 0; i < *cantBarcos; ++i)
+	{
+		int j;
+		int oc = *((barcos+i)->ocupados);
+		for(j = 0; j < oc; ++j)
+		{
+			free((((barcos+i)->tripulantes)+j)->nombre);
+			free((((barcos+i)->tripulantes)+j)->apellido);
+			free((((barcos+i)->tripulantes)+j)->rol);
+			free((((barcos+i)->tripulantes)+j)->edad);
+			printf("%d", j);
+		}
+		printf("%d", i);
+		free((barcos+i)->tripulantes);
+		free(((barcos+i)->propietario)->nombre);
+		free(((barcos+i)->propietario)->apellido);
+		free(((barcos+i)->propietario)->edad);
+		free((barcos+i)->nombre);
+		free((barcos+i)->maximoTripulantes);
+		free((barcos+i)->ocupados);
+		free((barcos+i)->propietario);
+		free((barcos+i)->eslora);
+		free((barcos+i)->manga);
+	}
+	free(barcos);
+}
+
+void agregarPersona(struct persona ** p, int * num)
+{
+	if(*num == 0)
+	{
+		*p = (struct persona *)malloc(sizeof(struct persona));
+	}
+	else
+	{
+		*p = realloc(*p, (*num+1)*sizeof(struct persona));
+	}
+	(*p+(*num))->nombre = (char*)malloc(30*sizeof(char));
+	(*p+(*num))->apellido = (char*)malloc(30*sizeof(char));
+	(*p+(*num))->rol = (char*)malloc(30*sizeof(char));
+	(*p+(*num))->edad = (int*)malloc(sizeof(int));
+	return;
+}
+
+
+void agregarBarco(struct barco ** b, int * cantBarcos)
+{
+	if(*cantBarcos == 0)
+	{
+		*b = (struct barco *)malloc(sizeof(struct barco));
+	}
+	else
+	{
+		*b = realloc(*b, ((*cantBarcos)+1)*sizeof(struct barco));
+	}
+	(*b+(*cantBarcos))->nombre = (char*)malloc(30*sizeof(char));
+	(*b+(*cantBarcos))->propietario = (struct persona*)malloc(sizeof(struct persona));
+	(*b+(*cantBarcos))->propietario->nombre = (char*)malloc(30*sizeof(char));
+	(*b+(*cantBarcos))->propietario->apellido = (char*)malloc(30*sizeof(char));
+	(*b+(*cantBarcos))->propietario->rol = NULL;
+	(*b+(*cantBarcos))->propietario->edad = (int*)malloc(sizeof(int));
+	(*b+(*cantBarcos))->tripulantes = NULL;
+	(*b+(*cantBarcos))->maximoTripulantes = (int*)malloc(sizeof(int));
+	(*b+(*cantBarcos))->ocupados = (int*)malloc(sizeof(int));
+	(*b+(*cantBarcos))->eslora = (float*)malloc(sizeof(float));
+	(*b+(*cantBarcos))->manga = (float*)malloc(sizeof(float));
+	(*cantBarcos)++;
+	return;
+}
+
+
+
+
+
