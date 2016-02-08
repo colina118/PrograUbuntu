@@ -10,7 +10,7 @@ int main(int argc, const char * argv[]) {
     int pid;
     int n;
     int i;
-    int prom;
+    float prom;
 
     printf("Entre un numero: \n");
     scanf("%d", &n);
@@ -30,8 +30,8 @@ int main(int argc, const char * argv[]) {
         else if (pid == 0)
         {
             // Estamos en el hijo
-            prom = (getpid() + getppid())/2;
-            printf("%d \n", prom);
+            prom = ((float)getpid() + (float)getppid())/2;
+            printf("%f \n", prom);
             exit(0);
         }
         else {
