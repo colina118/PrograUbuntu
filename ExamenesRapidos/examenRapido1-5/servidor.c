@@ -83,6 +83,8 @@ int main(int argc, const char * argv[])
                   temp2 = *(lecturas+(j+1));
                 }
               }
+              printf("el maximo es: %d", temp);
+              printf("el minimo es: %d", temp2);
             }
         }
 
