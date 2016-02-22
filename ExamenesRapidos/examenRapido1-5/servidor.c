@@ -68,6 +68,7 @@ int main(int argc, const char * argv[])
             while (leidos = read(cliente, &buffer, sizeof(buffer))) {
                 leidos = (int)leidos;
                 *(lecturas+cont) = leidos;
+                cont++;
               }
               temp = *(lecturas);
               temp2 = *(lecturas);

@@ -54,9 +54,9 @@ int main(int argc, const char * argv[])
           usleep(50);
         }
 
-        for(j = 0; j < cont; j++)
+        for(j = lecturas; j < cont; j++)
         {
-          if(*(lecturas+j) != 0)
+          if(j != 0)
           {
             break;
           }
@@ -66,11 +66,12 @@ int main(int argc, const char * argv[])
         {
           i = 0;
         }
-        // Escribir datos en el socket
-        while (cont > 0)
+        for(j = lecturas; j < cont; j++)
         {
-            write(cliente, &buffer, *(lecturas+cont));
+          write(cliente, j, sizeof(int));
         }
+        // Escribir datos en el socket
+
     }
   }
 
