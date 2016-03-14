@@ -27,6 +27,7 @@ int main(int argc, const char * argv[])
   int i, j;
   int fd;
   int length;
+  int senal;
   struct stat arch;
   length = ((Iteraciones-1 / 10)+9);
   char * archivo =(char *)malloc(length * sizeof(char));
@@ -57,9 +58,10 @@ int main(int argc, const char * argv[])
 
     sigpending(&pendientes);
 
-    for(j = 0; j < pendientes.size(); j ++)
+    for(senal = 1; senal < NSIG; senal++)
     {
-      write(fd, pendientes[j], sizeof(char));
+      if(sigismember(&pendientes, senal))
+        fprintf(fd, "\nWas blocked: the signal %d\n", senal);
     }
 
     fstat(fd, &arch);
