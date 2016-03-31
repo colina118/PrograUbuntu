@@ -4,12 +4,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define TAQ 3
+
 #define COMP 10
-#define SALAS 3
-#define LUGARES 50
-#define THREADS 3000
 #define BOLETOS 4
+#define SALAS 3
+#define TAQ 3
+#define LUGARES 50
+#define THREADS 10000
+
 
 typedef struct complejo
 {
@@ -49,8 +51,9 @@ void * compraBoleto(void * param)
 int main(int argc, char * argv[])
 {
     srand(time(NULL));
-    // Reservar memoria
+
     int i;
+
     complejo_t * complejos = (complejo_t *) malloc(COMP * sizeof(complejo_t));
     pthread_t * threads = (pthread_t *) malloc(THREADS*sizeof(pthread_t));
     for(i = 0; i < COMP; ++i)
@@ -68,26 +71,28 @@ int main(int argc, char * argv[])
         sem_init((complejos+i)->taq, 0 , TAQ);
     }
 
-    // Lanzar threads
+
     for(i = 0; i < THREADS; ++i)
     {
         pthread_create(threads+i, NULL, compraBoleto, complejos+(rand()%COMP));
     }
 
 
-    // Esperar a todas las threads
+
     for(i = 0; i < THREADS; ++i)
     {
         pthread_join(*(threads+i), NULL);
     }
 
-    // Liberar memoria
+
     for(i = 0; i < COMP; ++i)
     {
         free((complejos+i)->taq);
         free((complejos+i)->asien);
         free((complejos+i)->sal);
     }
+
+
     free(complejos);
     free(threads);
     return 0;
