@@ -103,12 +103,14 @@ int main(int argc, char** argv)
 	srand((int) time(NULL));
 	pthread_t dataRegistry[N];
 	pthread_t alarmRegistry[N];
-	for (i = 0; i < N; ++i) {
+	for (i = 0; i < N; ++i)
+  {
 		pthread_create(&dataRegistry[i], NULL, dataReading, (void*) (intptr_t) i);
 		pthread_create(&alarmRegistry[i], NULL, alarmReading, (void*) (intptr_t) i);
 	}
 
-	for (i = 0; i < N; ++i) {
+	for (i = 0; i < N; ++i)
+  {
 		pthread_join(dataRegistry[i], NULL);
 		pthread_join(alarmRegistry[i], NULL);
 	}
