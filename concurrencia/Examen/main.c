@@ -4,131 +4,92 @@
 #include <stdint.h>
 #include <pthread.h>
 
-int tabacoA=0, papelA=0, fosforoA=0;
-int tabacoB=0, papelB=0, fosforoB=0;
-int tabacoC=0, papelC=0, fosforoC=0;
-int recT=0, recP=0, recF=0;
+int rec[3];
+int fuming[3];
 
-pthread_mutex_t fumadorA = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t fumadorB = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t fumadorC = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mesa = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t fumar = PTHREAD_MUTEX_INITIALIZER;
 
-void* fumar(void* args)
+void* fumando(void* args)
 {
-  int id=(int) args;
-  while(true)
+  int fumador = (intptr_t)args;
+  while(1)
   {
-    if(tabacoA==1 && papelA==1 && fosforoA==1 && id == 1)
+    pthread_mutex_lock(&fumar);
+    if(rec[0] && rec[1] && rec[2])
     {
-      pthread_mutex_lock(&fumadorA);
-      printf("El fumador A esta fumando\n");
-      tabacoA=0;
-      papelA=0;
-      fosforoA=0;
+      rec[0] = 0;
+      rec[1] = 0;
+      rec[2] = 0;
+      fuming[fumador] = 1;
+      printf("Fumador %d esta fumando\n", fumador);
+      pthread_mutex_unlock(&fumar);
       sleep(10);
-      pthread_mutex_unlock(&fumadorA);
-      sleep(20);
-    }
-    else if(tabacoB==1 && papelB==1 && fosforoB==1 && id == 2)
-    {
-      pthread_mutex_lock(&fumadorB);
-      printf("El fumador B esta fumando\n");
-      tabacoB=0;
-      papelB=0;
-      fosforoB=0;
-      sleep(10);
-      pthread_mutex_unlock(&fumadorB);
-      sleep(20);
-    }
-    else if(tabacoC==1 && papelC==1 && fosforoC==1 && id == 3)
-    {
-      pthread_mutex_lock(&fumadorC);
-      printf("El fumador C esta fumando \n");
-      tabacoC=0;
-      papelC=0;
-      fosforoC=0;
-      sleep(10);
-      pthread_mutex_unlock(&fumadorC);
+      pthread_mutex_lock(&fumar);
+      fuming[fumador] = 0;
+      pthread_mutex_unlock(&fumar);
       sleep(20);
     }
     else
     {
-      int ran = rand()%3;
-      if(ran == 1)
-      {
-        if(pthread_mutex_trylock(&mesa) != 0)
-        {
-          tabacoA=1;
-          papelA=1;
-          fosforoA=1;
-        }
-        else
-        {
-            pthread_mutex_unlock(&mesa);
-        }
-      }
-      else if(ran == 2)
-      {
-        if(pthread_mutex_trylock(&mesa) != 0)
-        {
-          tabacoB=1;
-          papelB=1;
-          fosforoB=1;
-        }
-        else
-        {
-            pthread_mutex_unlock(&mesa);
-        }
-      }
-      else if(ran == 3)
-      {
-        if(pthread_mutex_trylock(&mesa) != 0)
-        {
-          tabacoC=1;
-          papelC=1;
-          fosforoC=1;
-        }
-        else
-        {
-            pthread_mutex_unlock(&mesa);
-        }
-      }
+      pthread_mutex_unlock(&fumar);
     }
   }
 }
 
-void colectar(void* args)
+void* colectar(void* args)
 {
-  while(true)
+  int i;
+  while(1)
   {
-    if(recT==0 && recP==0 && recF==0)
+    for(i=0;i<3;i++)
     {
-      pthread_mutex_lock(&mesa);
-      if(pthread_mutex_lock(&fumadorA)==0)
-      {
-        recT=1;
-        printf("Agente pidiendo tabaco\n")
-        pthread_mutex_unlock(&fumadorA);
-      }
-      if(pthread_mutex_lock(&fumadorB)==0)
-      {
-        recP=1;
-        printf("Agente pidiendo papel\n")
-        pthread_mutex_unlock(&fumadorB);
-      }
-      if(pthread_mutex_lock(&fumadorC)==0)
-      {
-        recF=1;
-        printf("Agente pidiendo tabaco\n")
-        pthread_mutex_unlock(&fumadorC);
-      }
-
+        pthread_mutex_lock(&fumar);
+        if(!fuming[i])
+        {
+          pthread_mutex_unlock(&fumar);
+          sleep(3);
+          pthread_mutex_lock(&fumar);
+          rec[i]=1;
+          if(i == 0)
+          {
+            printf("Fumador %d dando tabaco\n", i);
+          }
+          else if(i == 1)
+          {
+            printf("Fumador %d dando papel\n", i);
+          }
+          else if(i == 2)
+          {
+            printf("Fumador %d dando fosforos\n", i);
+          }
+        }
+        pthread_mutex_unlock(&fumar);
     }
   }
 }
+
 
 int main(int argc, char** argv)
 {
+  int i;
 
+  for(i=0;i< 3; i++)
+  {
+    fuming[i]=0;
+    rec[i]=1;
+  }
+
+  pthread_t agente;
+  pthread_create(&agente, NULL, colectar, NULL);
+  pthread_t fumador[3];
+
+  for(i=0;i<3;i++)
+  {
+    pthread_create(&fumador[i], NULL, fumando, (void*)(intptr_t)i);
+  }
+  for(i=0;i<3;i++)
+  {
+    pthread_join(fumador[i], NULL);
+  }
+  pthread_join(agente, NULL);
 }
