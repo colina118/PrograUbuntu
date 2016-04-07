@@ -3,8 +3,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
-#include <time.h>
 #include <unistd.h>
+#include <time.h>
 
 #define TCP_PORT 8000
 
@@ -12,15 +12,13 @@ int main(int argc, const char * argv[])
 {
     struct sockaddr_in direccion;
     char buffer[1000];
-    int i = -1, cont=1, j;
-    int periodo;
+
     int cliente;
+    int random = -1;
 
-    clock_t start;
+    srand (time(NULL));
 
-    int * lecturas =(int *)malloc(1*sizeof(int));
-
-    int leidos, escritos;
+    ssize_t leidos, escritos;
 
     if (argc != 2) {
         printf("Use: %s IP_Servidor \n", argv[0]);
@@ -37,43 +35,22 @@ int main(int argc, const char * argv[])
 
     escritos = connect(cliente, (struct sockaddr *) &direccion, sizeof(direccion));
 
-    if (escritos == 0) {
+    if (escritos == 0)
+    {
         printf("Conectado a %s:%d \n",
                inet_ntoa(direccion.sin_addr),
                ntohs(direccion.sin_port));
-    while(i != 0)
-    {
-      start = clock();
-      periodo = rand()%10;
-      cont = 1;
-        while((int)start-clock() >= periodo)
-        {
-          realloc(lecturas, cont*sizeof(int));
-          *(lecturas+cont) = rand()%5;
-          cont++;
-          usleep(50);
-        }
 
-        for(j = lecturas; j < cont; j++)
-        {
-          if(j != 0)
-          {
-            break;
-          }
-        }
-
-        if(j == cont)
-        {
-          i = 0;
-        }
-        for(j = lecturas; j < cont; j++)
-        {
-          write(cliente, j, sizeof(int));
-        }
         // Escribir datos en el socket
-
+        while (random != 0)
+        {
+            printf("entre una vez");
+            random = rand()%10;
+            write(cliente, &buffer, random);
+            printf(random);
+            /* Lee del buffer y escribe en pantalla */
+        }
     }
-  }
 
     // Cerrar sockets
     close(cliente);

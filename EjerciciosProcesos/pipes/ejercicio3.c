@@ -3,16 +3,18 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-void leer(int *fd);
-void escribir(int *fd);
+void leer(int *fd, int *fd2);
+void escribir(int *fd, int *fd2);
 int factorial(int);
 
 int main(int argc, const char * argv[])
 {
     int tuberia[2];
+    int tuberiaReg[2];
     pid_t pid;
 
     pipe(tuberia);
+    pipe(tuberiaReg);
 
     pid = fork();
 
@@ -27,42 +29,49 @@ int main(int argc, const char * argv[])
 
         printf(" Soy el hijo y estoy leyendo ... \n");
 
-        leer(tuberia);
+        leer(tuberia, tuberiaReg);
     }
     else {
         /* Padre */
 
         printf(" Soy el padre y estoy escribiendo ... \n");
 
-        escribir(tuberia);
+        escribir(tuberia, tuberiaReg);
     }
 
     return 0;
 }
 
-void leer(int *fd)
+void leer(int *fd, int *fd2)
 {
     int c;
+    int fact;
 
     while (1)
     {
       close(fd[1]);
       read(fd[0], &c, sizeof(int));
-      printf("%d! = %d\n", c, factorial(c));
+      fact = factorial(c);
+      close(fd2[0]);
+      write(fd2[1], &fact, sizeof(int));
     }
 
 }
 
-void escribir(int *fd)
+void escribir(int *fd, int *fd2)
 {
-    int c;
+    int c = -1;
+    int fact;
 
-    while (1) {
+    while (c != 0) {
       printf("Entre un numero: \n");
       scanf("%d", &c);
       close(fd[0]);
       fprintf("Factorial es: %d \n", c);
       write(fd[1], &c, sizeof(int));
+      close(fd2[1]);
+      read(fd2[0], &fact, sizeof(int));
+      printf("Factorial es = %d\n", fact);
     }
 
 }

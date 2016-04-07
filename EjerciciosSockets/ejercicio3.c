@@ -12,13 +12,9 @@ int main(int argc, const char * argv[])
     struct sockaddr_in direccion;
     char buffer[1000];
 
-    int i=-1, j;
-    int cont;
-    int temp, temp2;
     int servidor, cliente;
-    int * lecturas =(int *)malloc(1*sizeof(int));
 
-    int leidos, escritos;
+    ssize_t leidos, escritos;
     int continuar = 1;
     pid_t pid;
 
@@ -62,29 +58,13 @@ int main(int argc, const char * argv[])
         close(servidor);
 
         if (cliente >= 0) {
-          while(i != 0)
-          {
+
             // Leer datos del socket
-            while (leidos = read(cliente, &buffer, sizeof(buffer))) {
-                leidos = (int)leidos;
-                *(lecturas+cont) = leidos;
-                cont++;
-              }
-              temp = *(lecturas);
-              temp2 = *(lecturas);
-              for(j = 0; j < cont; j++)
-              {
-                if(temp< *(lecturas+(j+1)))
-                {
-                  temp = *(lecturas+(j+1));
-                }
-                else if(temp2> *(lecturas+(j+1)))
-                {
-                  temp2 = *(lecturas+(j+1));
-                }
-              }
-              printf("el maximo es: %d", temp);
-              printf("el minimo es: %d", temp2);
+            while (leidos = read(cliente, &buffer, sizeof(buffer)) != 0)
+            {
+                write(fileno(stdout), &buffer, leidos);
+
+                /* Leer de teclado y escribir en el socket */
             }
         }
 
