@@ -8,7 +8,9 @@ int main(int argv, char** argc)
   int cont;
   int nthreads = 0;
   int tid;
-  int arreglo[6];
+  float arreglo[6];
+
+  omp_set_nested(1);
   #pragma omp parrallel
   {
     #pragma omp sections
@@ -31,17 +33,22 @@ int main(int argv, char** argc)
       }
       #pragma omp section
       {
-        #pragma omp parallel num_threads(6) shared(i, arreglo, tid)
+        #pragma omp parallel num_threads(6) shared(i, arreglo, tid, nthreads)
         {
           tid = omp_get_thread_num();
+          nthreads = omp_get_num_threads();
           arreglo[tid] = rand_r(&tid)%100;
         }
-        int temp = 0;
+        float temp = 0;
+        float prom = 1;
         for(i = 0; i < 6; i++)
         {
-          printf("Pos %d valor = %d\n", i, arreglo[i]);
+          printf("Pos %d valor = %f\n", i, arreglo[i]);
           temp += arreglo[i];
+          prom = temp /6;
         }
+        printf("Promedio: %f\nSumatiora: %f\n", prom, temp);
+        printf("Iteraciones: %d\n", nthreads);
       }
     }
   }
