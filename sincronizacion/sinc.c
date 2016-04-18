@@ -40,6 +40,7 @@ int main(int argv, char** argc)
           arreglo[tid] = rand_r(&tid)%100;
         }
         float temp = 0;
+        
         float prom = 1;
         for(i = 0; i < 6; i++)
         {
